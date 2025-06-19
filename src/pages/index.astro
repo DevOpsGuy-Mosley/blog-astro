@@ -1,11 +1,252 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import BlogLayout from '../layouts/BlogLayout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const posts = await getCollection('blog');
+const sortedPosts = posts.sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BlogLayout title="Accueil" description="Blog dédié au basketball ivoirien, son histoire et ses talents">
+  <section class="hero">
+    <h1>🏀 Bienvenue sur le blog du Basket Ivoirien</h1>
+    <p>Découvrez l'histoire, les talents et les couleurs de la balle orange en Côte d'Ivoire !</p>
+    <a href="/blog" class="cta-button">Voir tous les articles</a>
+  </section>
+
+  <section class="featured-posts">
+    <h2>Derniers Articles</h2>
+    
+    <div class="posts-grid">
+      {sortedPosts.map(post => (
+        <article class="post-card">
+          <div class="post-image">
+            <img 
+              src={post.data.image || '/images/sipa_ap22254404_000001.avif'} 
+              alt={post.data.title}
+              loading="lazy"
+            />
+          </div>
+          <div class="post-content">
+            <h3>
+              <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+            </h3>
+            <div class="post-meta">
+              <span class="post-date">{new Date(post.data.pubDate).toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}</span>
+              <span class="post-author">par {post.data.author}</span>
+            </div>
+            <p class="post-excerpt">{post.data.description}</p>
+            <div class="post-tags">
+              {post.data.tags && post.data.tags.map(tag => (
+                <span class="tag">{tag}</span>
+              ))}
+            </div>
+            <a href={`/blog/${post.slug}`} class="read-more">Lire la suite →</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="about-section">
+    <h2>À propos du Basket Ivoirien</h2>
+    <div class="about-content">
+      <div class="about-text">
+        <p>Le basketball en Côte d'Ivoire a une riche histoire et continue de se développer avec de nombreux talents qui émergent chaque année. Notre blog vise à mettre en lumière ces talents, à raconter l'histoire du basket ivoirien et à suivre son évolution.</p>
+        <p>Que vous soyez un passionné de longue date ou un nouveau fan, vous trouverez ici des articles intéressants sur tous les aspects du basketball ivoirien.</p>
+      </div>
+      <div class="about-image">
+        <img src="/images/Cote-dIvoire.jpg" alt="Basketball en Côte d'Ivoire" loading="lazy" />
+      </div>
+    </div>
+  </section>
+</BlogLayout>
+
+<style>
+  .hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/sipa_ap22254404_000001.avif');
+    background-size: cover;
+    background-position: center;
+    color: var(--white);
+    padding: 4rem 2rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    border-radius: 8px;
+  }
+  
+  .hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--white);
+    border-bottom: none;
+  }
+  
+  .hero p {
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+  }
+  
+  .cta-button {
+    display: inline-block;
+    background-color: var(--orange);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cta-button:hover {
+    background-color: var(--orange-dark);
+    text-decoration: none;
+  }
+  
+  .featured-posts {
+    margin-bottom: 4rem;
+  }
+  
+  .featured-posts h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+  
+  .post-card {
+    background-color: var(--gray-dark);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-left: none;
+  }
+  
+  .post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .post-image {
+    height: 200px;
+    overflow: hidden;
+  }
+  
+  .post-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .post-card:hover .post-image img {
+    transform: scale(1.05);
+  }
+  
+  .post-content {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .post-content h3 {
+    margin-top: 0;
+    font-size: 1.3rem;
+  }
+  
+  .post-meta {
+    color: var(--gray-light);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .post-excerpt {
+    color: var(--off-white);
+    margin-bottom: 1rem;
+    flex-grow: 1;
+  }
+  
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .read-more {
+    align-self: flex-start;
+    color: var(--orange);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .read-more:hover {
+    color: var(--orange-light);
+  }
+  
+  .about-section {
+    background-color: var(--gray-dark);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 3rem;
+  }
+  
+  .about-section h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .about-content {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 2rem;
+    align-items: center;
+  }
+  
+  .about-text p {
+    margin-bottom: 1rem;
+  }
+  
+  .about-image img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  @media (max-width: 768px) {
+    .hero {
+      padding: 3rem 1rem;
+    }
+    
+    .hero h1 {
+      font-size: 2rem;
+    }
+    
+    .posts-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .about-content {
+      grid-template-columns: 1fr;
+    }
+    
+    .about-image {
+      order: -1;
+    }
+  }
+</style>

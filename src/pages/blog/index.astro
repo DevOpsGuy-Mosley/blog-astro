@@ -1,0 +1,36 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import { getCollection } from 'astro:content';
+import ArticleModal from '../../components/ArticleModal.astro';
+
+const posts = await getCollection('blog');
+---
+
+<BlogLayout title="Articles du Blog">
+  <h1>Articles du Blog</h1>
+  <ul id="posts-list">
+    {posts.length > 0 ? (
+      posts.map(post => (
+        <li style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+          {post.data.image && (
+            <img src={post.data.image} alt={post.data.title} style="width: 120px; height: 80px; object-fit: cover; border-radius: 4px;" />
+          )}
+          <div>
+          <a href={`/blog/${post.slug}`} style="font-weight: bold; font-size: 1.2rem; color: var(--orange); text-decoration: none;">
+            {post.data.title}
+          </a>
+            <br />
+            <small><i>{post.data.pubDate?.toString()}</i> - par {post.data.author}</small>
+            <p>{post.data.description ?? ''}</p>
+            {/* Removed "lire la suite" button to simplify */}
+          </div>
+        </li>
+      ))
+    ) : (
+      <p>Aucun article disponible pour le moment.</p>
+    )}
+  </ul>
+
+  
+
+</BlogLayout>

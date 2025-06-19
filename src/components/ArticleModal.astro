@@ -1,0 +1,81 @@
+---
+const { title, content } = Astro.props;
+---
+
+<style>
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .modal-overlay.active {
+    display: flex;
+  }
+  .modal-content {
+    background: #1e1e1e;
+    color: #f0f0f0;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+    position: relative;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-close {
+    cursor: pointer;
+    font-size: 1.5rem;
+    border: none;
+    background: none;
+    color: #f0f0f0;
+  }
+</style>
+
+<div id="modal" class="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="modal-title">{title}</h2>
+      <button class="modal-close" aria-label="Close modal" onclick="closeModal(event)">&times;</button>
+    </div>
+    <div id="modal-body" class="modal-body">
+      {content}
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  function closeModal(event) {
+    event.preventDefault();
+    const modal = document.getElementById('modal');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+  }
+
+  window.openModal = function(title, content) {
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modal = document.getElementById('modal');
+    if (modalTitle) {
+      modalTitle.textContent = title;
+    }
+    if (modalBody) {
+      modalBody.innerHTML = content;
+    }
+    if (modal) {
+      modal.classList.add('active');
+    }
+  }
+</script>

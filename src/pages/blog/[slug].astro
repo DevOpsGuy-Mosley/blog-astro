@@ -1,0 +1,31 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import { getEntryBySlug } from "astro:content";
+
+export async function getStaticPaths() {
+  // nécessaire pour générer les pages dynamiques à la compilation
+  const allPosts = await import.meta.glob('../../content/blog/*.md', { eager: true });
+  return Object.keys(allPosts).map((file) => {
+    const slug = file.split('/').pop().replace('.md', '');
+    return { params: { slug } };
+  });
+}
+
+const { slug } = Astro.params;
+const post = await getEntryBySlug("blog", slug);
+---
+
+<BlogLayout title={post?.data?.title ?? "Article non trouvé"}>
+  {post && post.data ? (
+    <>
+      <h1>{post.data.title}</h1>
+      <p><i>{post.data.pubDate?.toString()}</i> - par {post.data.author}</p>
+      {@html post.body}
+    </>
+  ) : (
+    <>
+      <h1>404 - Article non trouvé</h1>
+      <p>Désolé, l'article demandé n'existe pas.</p>
+    </>
+  )}
+</BlogLayout>
