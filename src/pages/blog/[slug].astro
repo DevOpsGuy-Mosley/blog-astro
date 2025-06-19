@@ -1,26 +1,43 @@
 ---
 import BlogLayout from '../../layouts/BlogLayout.astro';
-import { getEntryBySlug } from "astro:content";
+import { getEntryBySlug } from "astro:content"; // Gardez cette ligne
+import { getCollection } from "astro:content"; // Ajoutez cette ligne pour getStaticPaths
 
 export async function getStaticPaths() {
-  // nécessaire pour générer les pages dynamiques à la compilation
-  const allPosts = await import.meta.glob('../../content/blog/*.md', { eager: true });
-  return Object.keys(allPosts).map((file) => {
-    const slug = file.split('/').pop().replace('.md', '');
-    return { params: { slug } };
-  });
+  // Récupérez directement la collection 'posts'
+  const allPosts = await getCollection('posts');
+  return allPosts.map((post) => ({
+    params: { slug: post.slug },
+    props: post, // Passez l'objet post complet comme prop pour simplifier
+  }));
 }
 
 const { slug } = Astro.params;
-const post = await getEntryBySlug("blog", slug);
+// Récupérez l'entrée directement depuis les props si vous l'avez passée dans getStaticPaths
+const post = Astro.props; // post est déjà l'objet complet de l'article
+
+// Si vous n'avez pas passé le 'post' complet comme prop, utilisez getEntryBySlug
+// const post = await getEntryBySlug("posts", slug); // Utilisez "posts" ici au lieu de "blog"
 ---
 
 <BlogLayout title={post?.data?.title ?? "Article non trouvé"}>
   {post && post.data ? (
     <>
       <h1>{post.data.title}</h1>
-      <p><i>{post.data.pubDate?.toString()}</i> - par {post.data.author}</p>
-      {@html post.body}
+      {/* Vérifiez que post.data.pubDate et post.data.author existent dans le frontmatter de vos MD */}
+      <p><i>{post.data.pubDate?.toLocaleDateString('fr-FR')}</i></p>
+      {/* Si vous avez un champ 'author' dans votre schéma de contenu et vos MD */}
+      {post.data.author && <p>Par : {post.data.author}</p>}
+      <p>Tags : {post.data.tags?.join(', ')}</p>
+
+      {/* post.render() est nécessaire pour afficher le contenu Markdown */}
+      {post.render ? (
+          <astro:content>
+              <post.render />
+          </astro:content>
+      ) : (
+          <p>Contenu non disponible.</p>
+      )}
     </>
   ) : (
     <>
