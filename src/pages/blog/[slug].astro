@@ -5,7 +5,7 @@ import { getCollection } from "astro:content"; // Ajoutez cette ligne pour getSt
 
 export async function getStaticPaths() {
   // Récupérez directement la collection 'posts'
-  const allPosts = await getCollection('posts');
+  const allPosts = await getCollection('blog');
   return allPosts.map((post) => ({
     params: { slug: post.slug },
     props: post, // Passez l'objet post complet comme prop pour simplifier
@@ -16,8 +16,8 @@ const { slug } = Astro.params;
 // Récupérez l'entrée directement depuis les props si vous l'avez passée dans getStaticPaths
 const post = Astro.props; // post est déjà l'objet complet de l'article
 
-// Si vous n'avez pas passé le 'post' complet comme prop, utilisez getEntryBySlug
-// const post = await getEntryBySlug("posts", slug); // Utilisez "posts" ici au lieu de "blog"
+// Await the rendered content
+const content = post.render ? await post.render() : null;
 ---
 
 <BlogLayout title={post?.data?.title ?? "Article non trouvé"}>
@@ -30,13 +30,12 @@ const post = Astro.props; // post est déjà l'objet complet de l'article
       {post.data.author && <p>Par : {post.data.author}</p>}
       <p>Tags : {post.data.tags?.join(', ')}</p>
 
-      {/* post.render() est nécessaire pour afficher le contenu Markdown */}
-      {post.render ? (
-          <astro:content>
-              <post.render />
-          </astro:content>
+      {content && content.Content ? (
+        <astro:content>
+          <content.Content />
+        </astro:content>
       ) : (
-          <p>Contenu non disponible.</p>
+        <p>Contenu non disponible.</p>
       )}
     </>
   ) : (
